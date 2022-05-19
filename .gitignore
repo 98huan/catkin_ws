@@ -1,3 +1,9 @@
+/.vscode
+/devel
+/.catkin_workspace
+
+# /3rdparty
+
 # Prerequisites
 *.d
 
@@ -30,3 +36,7 @@
 *.exe
 *.out
 *.app
+
+*cmake-build-*
+*.idea
+**build**
