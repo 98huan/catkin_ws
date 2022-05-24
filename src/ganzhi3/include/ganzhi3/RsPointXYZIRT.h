@@ -1,3 +1,7 @@
+// 我们用的是devel/include里的，这里只做一个备份
+#ifndef RSPOINTXYZIRT_H
+#define RSPOINTXYZIRT_H
+
 #include <pcl/io/io.h>
 #include <pcl/point_types.h>
 struct RsPointXYZIRT
@@ -10,4 +14,4 @@ struct RsPointXYZIRT
 } EIGEN_ALIGN16;
 POINT_CLOUD_REGISTER_POINT_STRUCT(RsPointXYZIRT, (float, x, x)(float, y, y)(float, z, z)(uint8_t, intensity, intensity)(uint16_t, ring, ring)(double, timestamp, timestamp))
 
-
+#endif  //RSPOINTXYZIRT_H

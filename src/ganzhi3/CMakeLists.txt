@@ -60,6 +60,10 @@ add_message_files(
   center.msg
 )
 
+add_message_files(
+  FILES
+  guagou_in_houzhou.msg
+)
 ## Generate services in the 'srv' folder
 # add_service_files(
 #   FILES

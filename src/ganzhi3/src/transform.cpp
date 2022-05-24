@@ -1,7 +1,7 @@
 #include <iostream>
 #include <math.h>
 using namespace std;
-
+// 测试用坐标转换
 #define rear_axle_center_in_lidar_x            2.5345                 //后轴中心在雷达坐标系中的位姿 
 #define rear_axle_center_in_lidar_y            -0.9815               // 后轴中心在雷达坐标系中的位姿
 #define hook_in_erweima_x                           0.765               // 挂钩在二维码坐标系中的位姿
