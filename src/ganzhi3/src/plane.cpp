@@ -43,6 +43,7 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
 		seg.setOptimizeCoefficients(true); // flase 展示的是分割剩下的点
 		// Mandatory-设置目标几何形状
 		seg.setModelType(pcl::SACMODEL_PLANE);
+
 		//分割方法：随机采样法
 		seg.setMethodType(pcl::SAC_RANSAC);
 		//设置误差容忍范围，也就是阈值

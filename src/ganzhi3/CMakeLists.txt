@@ -3,7 +3,6 @@ project(ganzhi3)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
-
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -63,6 +62,11 @@ add_message_files(
 add_message_files(
   FILES
   guagou_in_houzhou.msg
+)
+
+add_message_files(
+  FILES
+  angle_to_huituo.msg
 )
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -161,6 +165,16 @@ target_link_libraries(scanID
 
 add_executable(transform src/transform.cpp)
 target_link_libraries(transform
+  ${catkin_LIBRARIES}
+)
+
+add_executable(perception src/perception.cpp)
+target_link_libraries(perception
+  ${catkin_LIBRARIES}
+)
+
+add_executable(angle_to_huituo src/angle_to_huituo.cpp)
+target_link_libraries(angle_to_huituo
   ${catkin_LIBRARIES}
 )
 

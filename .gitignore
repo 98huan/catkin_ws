@@ -1,7 +1,7 @@
 /.vscode
 /devel
 /.catkin_workspace
-
+/src/ganzhi3/result/**
 # /3rdparty
 
 # Prerequisites
