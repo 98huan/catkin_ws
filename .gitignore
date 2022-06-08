@@ -2,6 +2,7 @@
 /devel
 /.catkin_workspace
 /src/ganzhi3/result/**
+/src/eul2quat/**
 # /3rdparty
 
 # Prerequisites
