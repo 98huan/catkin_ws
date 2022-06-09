@@ -10,18 +10,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <ctime>
-#include <thread>
 #include <fstream>
-// #include <pcl/io/pcd_io.h>
-// #include <pcl/io/ply_io.h>
-// #include <pcl/visualization/pcl_visualizer.h>
-// #include <pcl/console/parse.h>
-// #include <pcl/common/transforms.h>
-// #include <pcl/segmentation/progressive_morphological_filter.h>
-// #include <pcl/kdtree/kdtree_flann.h>
-// #include <pcl/point_cloud.h>
-// #include <pcl/PCLPointCloud2.h>
-
 #include "ganzhi3/RsPointXYZIRT.h" //定义了速腾的点云结构，头文件放在devel/include中
 #include "ganzhi3/plane.h"
 #include "ganzhi3/center.h"
@@ -37,11 +26,10 @@ using namespace std;
  * z正方向为向上
  */
 
-ofstream ofs1; //创建文件流
-ofstream ofs2; //创建文件流
-ofstream ofs3; //创建文件流
-ofstream ofs4; //创建文件流
-
+ofstream ofs1;  //创建文件流
+ofstream ofs2;  //创建文件流
+ofstream ofs3;  //创建文件流
+ofstream ofs4;  //创建文件流
 
 #define width 0.60   //二维码板的宽度
 #define err_x 0.15   //相机雷达x偏移
@@ -115,7 +103,6 @@ int main(int argc, char **argv)
         ros::Publisher plane_para_pub_ = nh.advertise<ganzhi3::plane>("/plane_para", 10);
         // 发布坐标转换后挂钩在后轴中心的坐标
         ros::Publisher transform_pub_ = nh.advertise<ganzhi3::guagou_in_houzhou>("/transform", 10);
-        // ros::Publisher center_pub = nh.advertise<ganzhi3::center>("/search_center", 10);
 
         // 初始化搜索中心
         searchPoint.x = 0.0;
@@ -124,11 +111,11 @@ int main(int argc, char **argv)
 
         ofs1.open("/home/zh/catkin_ws/src/ganzhi3/result/search_center.txt");
         ofs1 << "center_cam_x\tcenter_cam_y\tcenter_lidar_x\tcenter_lidar_y" << endl;
-        ofs2.open("/home/zh/catkin_ws/src/ganzhi3/result/eul角.txt");
+        ofs2.open("/home/zh/catkin_ws/src/ganzhi3/result/eul_angle.txt");
         ofs2 << "raw\tpitch\tyawl\ttheta" << endl;
         ofs3.open("/home/zh/catkin_ws/src/ganzhi3/result/guagou_in_houzhou.txt");
         ofs3 << "lidar_guagou_in_houzhou_x\tlidar_guagou_in_houzhou_y\tcam_guagou_in_houzhou_x\tcam_guagou_in_houzhou_y" << endl;
-        ofs4.open("/home/zh/catkin_ws/src/ganzhi3/result/四元数.txt");
+        ofs4.open("/home/zh/catkin_ws/src/ganzhi3/result/quaternion.txt");
         ofs4 << "w\tx\ty\tz" << endl;
         ros::Rate loop_rate(10);
         while (ros::ok())
@@ -238,15 +225,8 @@ void big_search(pcl::PointCloud<RsPointXYZIRT>::Ptr original_cloud)
 // 大小邻域搜索
 void lidar_rawpoint_sub_cb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
 {
-        // time_t begin, end;
-        // begin = clock();
         pcl::PointCloud<RsPointXYZIRT>::Ptr original_cloud(new pcl::PointCloud<RsPointXYZIRT>); //存放雷达原始点云
         pcl::fromROSMsg(*cloud_msg, *original_cloud);   //把雷达原始点云从ROS格式转换成RsPointXYZIRT格式并存放到original_cloud里
-
-        // std::thread t1(small_search, std::ref(original_cloud)); // pass by reference
-        // std::thread t2(big_search, std::ref(original_cloud)); // pass by reference
-        // t1.join();
-        // t2.join();
 
         pcl::PointCloud<RsPointXYZIRT>::Ptr cloud_kdtree(new pcl::PointCloud<RsPointXYZIRT>);                                   //存储小邻域搜索后的点云
         pcl::CropBox<RsPointXYZIRT> box_filter;                                                                                 //滤波器对象
@@ -270,8 +250,6 @@ void lidar_rawpoint_sub_cb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
         cloud_ptplus.header.stamp = ros::Time::now();
         cloud_ptplus.header.frame_id = base_link; //设置发布点云的坐标系：要设置在输出点云存储的容器中
 
-        // end = clock();
-        // double total_time = double(end - begin) / CLOCKS_PER_SEC * 1000;
         return;
 } //大小邻域搜索
 
