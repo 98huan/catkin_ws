@@ -26,27 +26,26 @@ using namespace std;
  * z正方向为向上
  */
 
-ofstream ofs1;  //创建文件流
-ofstream ofs2;  //创建文件流
-ofstream ofs3;  //创建文件流
-ofstream ofs4;  //创建文件流
+ofstream ofs1;  //搜索中心
+ofstream ofs2;  //欧拉角
+ofstream ofs3;  //挂钩在后轴的坐标
+ofstream ofs4;  //四元数
 
-#define width 0.60   //二维码板的宽度
-#define err_x 0.15   //相机雷达x偏移
-#define err_y -0.01 //相机雷达y偏移
-#define err_z -0.12  //相机雷达z偏移
-
-// 定义大小搜索框
-#define samll_box_x 1.5
-#define samll_box_y 0.2
-#define samll_box_z 0.25
-#define big_box_x 2.0
-#define big_box_y 0.5
-#define big_box_z 0.4
+// 全局常量定义，从参数服务器读取
+double width;   //二维码板的宽度
+double err_x;       //相机和雷达坐标系的x偏移
+double err_y;       //相机和雷达坐标系的y偏移
+double err_z;       //相机和雷达坐标系的z偏移
+double samll_box_x;       //小搜索框x长度的一半
+double samll_box_y;       //小搜索框y长度的一半
+double samll_box_z;       //小搜索框z长度的一半
+double big_box_x;            //大搜索框x长度的一半
+double big_box_y;            //大搜索框y长度的一半
+double big_box_z;            //大搜索框z长度的一半
+int RING;  //激光雷达线束
 
 #define pi 3.1415926
-#define RING 80
-#define rear_axle_center_in_lidar_x 2.5345  //后轴中心在雷达坐标系下的x坐标
+#define rear_axle_center_in_lidar_x 2.5345 //后轴中心在雷达坐标系下的x坐标
 #define rear_axle_center_in_lidar_y -0.9815 //后轴中心在雷达坐标系下的y坐标
 #define hook_in_erweima_x 0.765             //挂钩在二维码坐标系下的x坐标
 #define hook_in_erweima_y -0.805            //挂钩在二维码坐标系下的y坐标
@@ -65,10 +64,10 @@ vector<RsPointXYZIRT> POINT_in_plane;  //存放二维码平面上点云的容器
 // 定义相机雷达识别到的二维码中心 全局变量
 static float center_cam_x = 0.0;
 static float center_cam_y = 0.0;
-static float center_cam_z = -0.12;
+static float center_cam_z = 0.0;
 static float center_lidar_x = 0.0;
 static float center_lidar_y = 0.0;
-static float center_lidar_z = -0.12;
+static float center_lidar_z = 0.0;
 
 float point_plane_distance(const RsPointXYZIRT &point);
 float point_point_distance(const RsPointXYZIRT &point1, const RsPointXYZIRT &point2);
@@ -84,6 +83,20 @@ int main(int argc, char **argv)
 {
         ros::init(argc, argv, "perception");
         ros::NodeHandle nh;
+        // 读取参数服务器中定义的常量
+        nh.param<double> ("width", width, 0.60);   //后面的默认参数必须加，如果参数服务器没定义就会用默认值
+        // nh.getParam("width", width);         //也可以用这个来获取参数，返回值是bool类型
+        nh.param<double>("err_x", err_x, 0.15);
+        nh.param<double> ("err_y", err_y, -0.01);
+        nh.param<double> ("err_z", err_z, -0.12);
+        nh.param<double> ("samll_box_x", samll_box_x, 1.5);
+        nh.param<double> ("samll_box_y", samll_box_y, 0.2);
+        nh.param<double> ("samll_box_z", samll_box_z, 0.25);
+        nh.param<double> ("big_box_x", big_box_x, 1.5);
+        nh.param<double> ("big_box_y", big_box_y, 0.5);
+        nh.param<double> ("big_box_z", big_box_z, 0.4);
+        nh.param<int> ("RING", RING, 80);
+        
         // 订阅相机发布的二维码点坐标
         ros::Subscriber camera_sub_ = nh.subscribe<geometry_msgs::PoseStamped>("/aruco_single/pose", 10, camera_sub_cb);
         // 订阅雷达原始点云,发布大小邻域搜索点云
@@ -107,7 +120,7 @@ int main(int argc, char **argv)
         // 初始化搜索中心
         searchPoint.x = 0.0;
         searchPoint.y = 0.0;
-        searchPoint.y = err_z;
+        searchPoint.z = err_z;
 
         ofs1.open("/home/zh/catkin_ws/src/ganzhi3/result/search_center.txt");
         ofs1 << "center_cam_x\tcenter_cam_y\tcenter_lidar_x\tcenter_lidar_y" << endl;
@@ -117,6 +130,7 @@ int main(int argc, char **argv)
         ofs3 << "lidar_guagou_in_houzhou_x\tlidar_guagou_in_houzhou_y\tcam_guagou_in_houzhou_x\tcam_guagou_in_houzhou_y" << endl;
         ofs4.open("/home/zh/catkin_ws/src/ganzhi3/result/quaternion.txt");
         ofs4 << "w\tx\ty\tz" << endl;
+
         ros::Rate loop_rate(10);
         while (ros::ok())
         {
@@ -158,7 +172,6 @@ int main(int argc, char **argv)
                 transform_pub_.publish(guagou_in_houzhou); //发布坐标转换后挂钩在后轴中心的坐标
                 // end = clock();
                 // cout << "while循环用时:" << double(end - begin) / CLOCKS_PER_SEC * 1000 << "ms" << endl;
-                // double total_time = double(end - begin) / CLOCKS_PER_SEC * 1000;
                 loop_rate.sleep();
         }
         ofs1.close(); //关闭文件流
@@ -174,6 +187,7 @@ void camera_sub_cb(const geometry_msgs::PoseStampedConstPtr &cloud_msg)
 {
         center_cam_x = (cloud_msg->pose.position.z) + err_x;  // 相机的z方向是雷达的x方向
         center_cam_y = -(cloud_msg->pose.position.x) + err_y; //相机的-x方向是雷达的+y方向
+        center_cam_z = err_z;
         // cout << "相机识别二维码中心："  << "(x = " << center_cam_x << ", y = " << center_cam_y << ", z = " << center_cam_z << " )" << endl;
         Eigen::Vector3d temp_eulur;
         temp_eulur = ToEulur(Eigen::Quaterniond(cloud_msg->pose.orientation.w, cloud_msg->pose.orientation.x, cloud_msg->pose.orientation.y, cloud_msg->pose.orientation.z));
@@ -274,7 +288,7 @@ void xiaolinyu_sub_to_nihe(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
                 //分割方法：随机采样法
                 seg.setMethodType(pcl::SAC_RANSAC);
                 //设置误差容忍范围
-                seg.setDistanceThreshold(0.01);
+                seg.setDistanceThreshold(0.03);
                 // 设置最大迭代次数
                 seg.setMaxIterations(500);
                 //输入点云
@@ -336,7 +350,7 @@ void kdtreeplus_subscriber_cb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
                                 //  调用点到平面距离计算公式，计算每个点到平面的距离是否在阈值内来判断是否是平面点
                                 plane_distance = point_plane_distance(laserRing[i].points[j]);
                                 //判断点是否在平面上
-                                if (plane_distance > -0.05 && plane_distance < 0.05) //点到平面的距离阈值设为5cm
+                                if (plane_distance > -0.08 && plane_distance < 0.08) //点到平面的距离阈值设为5cm
                                 {
                                         POINT_in_plane.push_back(laserRing[i].points[j]);
                                 }

@@ -1,8 +1,20 @@
 <launch>
-    <node pkg = "ganzhi3"     type="kdtree"       name = "points_nihe"                  output = "screen" /> 
-    <node pkg = "ganzhi3"     type="plane"         name = "nihe_plane"                  output = "screen" /> 
-    <node pkg = "ganzhi3"     type="scanID"       name = "lidar_pub_center"     output = "screen" /> 
-    <!-- <node pkg = "ganzhi3"     type="perception"       name = "total_perception"                  output = "screen" />  -->
+    <param name ="width" type="double" value="0.60" />            <!-- 二维码板的宽度-->
+    <param name ="err_x" type="double" value="0.15" />        <!-- 雷达相机的偏差x-->
+    <param name ="err_y" type="double" value="-0.01" />       <!-- 雷达相机的偏差y-->
+    <param name ="err_z" type="double" value="-0.12" />       <!-- 雷达相机的偏差z-->
+    <param name ="samll_box_x" type="double" value="1.5" />       <!-- 小矩形搜索的边界 -->
+    <param name ="samll_box_y" type="double" value="0.2" />       <!-- 小矩形搜索的边界 -->
+    <param name ="samll_box_z" type="double" value="0.25" />      <!-- 小矩形搜索的边界 -->
+    <param name ="big_box_x" type="double" value="2.0" />     <!-- 大矩形搜索的边界 -->
+    <param name ="big_box_y" type="double" value="0.5" />     <!-- 大矩形搜索的边界 -->
+    <param name ="big_box_z" type="double" value="0.4" />     <!-- 大矩形搜索的边界 -->
+    <param name ="RING" type="int" value="80" />     <!-- 雷达线束 -->
+
+    <!-- <node pkg = "ganzhi3"     type="kdtree"       name = "points_nihe"                  output = "screen" />  -->
+    <!-- <node pkg = "ganzhi3"     type="plane"         name = "nihe_plane"                  output = "screen" />  -->
+    <!-- <node pkg = "ganzhi3"     type="scanID"       name = "lidar_pub_center"     output = "screen" />  -->
+    <node pkg = "ganzhi3"     type="perception"       name = "total_perception"                  output = "screen" /> 
 
     <node pkg="rviz"                type="rviz"             name="rviz"         args="-d /home/zh/catkin_ws/src/ganzhi3/rviz/lidar_camera.rviz"      required="true" />
 </launch>
