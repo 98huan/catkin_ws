@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 
         ros::Publisher angle_pub_ = nh.advertise<ganzhi3::angle_to_huituo>("/angle_to_huituo", 1);      //发布转角给慧拓
 
-        ros::Rate loop_rate(10); //循环发布频率为10HZ
+        ros::Rate loop_rate(100); //循环发布频率为100HZ
         while (ros::ok())
         {
                 ros::spinOnce();
